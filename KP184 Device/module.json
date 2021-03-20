@@ -1,0 +1,11 @@
+{
+	"id": "{80BA0160-BF42-9783-06A2-DE54A1A5EECE}",
+	"name": "KP184",
+	"type": 3,
+	"vendor": "KUNKIN",
+	"aliases": ["KP184 Device"],
+	"parentRequirements": ["{9912F430-B787-A588-00A9-9E53B20D94D4}"],
+	"childRequirements": [],
+	"implemented": ["{CDE25829-ED60-22E3-B8A7-DD02C7B1340F}"],
+	"prefix": "KP184"
+}

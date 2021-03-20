@@ -1,0 +1,28 @@
+{
+	"elements":
+	[
+		{ "name": "AutoUpdate", "type": "CheckBox", "caption": "Auto Update" },
+		{ "name": "TimerInterval", "type": "NumberSpinner", "caption": "Timer Interval [ms]" },
+		{ "name": "DebugLevel", "type": "Select", "caption": "Debug/Log Level",
+            "options": [
+                { "label": "ALL", "value": 7 },
+                { "label": "TRACE", "value": 6 },
+                { "label": "DEBUG", "value": 5 },
+				{ "label": "INFO", "value": 4 },
+                { "label": "WARN", "value": 3 },
+                { "label": "ERROR", "value": 2 },
+				{ "label": "FATAL", "value": 1 },
+                { "label": "OFF", "value": 0 }
+        ]},
+		{ "name": "EnableIPSLogOutput", "type": "CheckBox", "caption": "Output Debug Messages in IPS-Log" }
+		
+	],
+	"actions":
+	[
+		{
+			"type": "Button",
+			"label": "manual request",
+			"onClick": "KP184_RequestVoltageCurrent($id);"
+		}
+	]
+}

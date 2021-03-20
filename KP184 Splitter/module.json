@@ -1,0 +1,11 @@
+{
+    "id": "{9CF2A083-5E3B-DC50-5D01-D6C6AF3B3BCC}",
+    "name": "KP184 Splitter",
+    "type": 2,
+    "vendor": "KUNKIN",
+    "aliases": ["KP184 Splitter"],
+    "parentRequirements": ["{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}"],
+    "childRequirements": ["{CDE25829-ED60-22E3-B8A7-DD02C7B1340F}"],
+    "implemented": ["{018EF6B5-AB94-40C6-AA53-46943E824ACF}", "{9912F430-B787-A588-00A9-9E53B20D94D4}"],
+    "prefix": "KP184S"
+}

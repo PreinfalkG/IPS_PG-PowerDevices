@@ -1,0 +1,11 @@
+{
+	"id": "{1196CB5D-66B3-5E2A-EA66-9D3D6242CC51}",
+	"name": "UM24C",
+	"type": 3,
+	"vendor": "Ruideng Technology",
+	"aliases": ["UM24C Device"],
+	"parentRequirements": ["{4C47F019-D24D-9A2E-A66F-3A7E14CB383E}"],
+	"childRequirements": [],
+	"implemented": ["{0693ED7E-D00E-2073-B745-7C90BD5E2A55}"],
+	"prefix": "UM24C"
+}
