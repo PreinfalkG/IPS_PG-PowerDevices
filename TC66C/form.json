@@ -1,0 +1,56 @@
+{
+    "elements": [
+        { "name": "AutoUpdate", "type": "CheckBox", "caption": "Auto Update" },
+		{ "name": "TimerInterval", "type": "NumberSpinner", "caption": "Update Interval [ms]" },
+		{ "name": "LogLevel", "type": "Select", "caption": "Debug/Log Level",
+            "options": [
+                { "label": "ALL", "value": 9 },
+                { "label": "TEST", "value": 8 },
+                { "label": "TRACE", "value": 7 },
+                { "label": "COMMUNICATION", "value": 6 },
+                { "label": "DEBUG", "value": 5 },
+				{ "label": "INFO", "value": 4 },
+                { "label": "WARN", "value": 3 },
+                { "label": "ERROR", "value": 2 },
+				{ "label": "FATAL", "value": 1 },
+                { "label": "OFF", "value": 0 }
+        ]}
+    ],
+    "actions": [
+        {
+            "name": "Text",
+            "type": "ValidationTextBox",
+            "caption": "Text"
+        },
+        {
+            "type": "Button",
+            "caption": "Request Data",
+            "onClick": "TC66C_RequestData($id, $Text);"
+        },
+        {
+            "type": "Button",
+            "caption": "Previous Screen Page",
+            "onClick": "TC66C_PreviousScreenPage($id, $Text);"
+        },     
+        {
+            "type": "Button",
+            "caption": "Next Screen Page",
+            "onClick": "TC66C_NextScreenPage($id, $Text);"
+        }, 
+        {
+            "type": "Button",
+            "caption": "Rotate Screen",
+            "onClick": "TC66C_RotateScreen($id, $Text);"
+        }, 
+        {
+            "type": "Button",
+            "caption": "Delete Logged",
+            "onClick": "TC66C_DeleteLoggedData($id, $Text);"
+        }                             
+    ],
+    "status": [
+        { "code": 104, "icon": "inactive", "caption": "form104" },
+        { "code": 102, "icon": "active", "caption": "form102" },
+        { "code": 201, "icon": "error", "caption": "form201" }        
+    ]
+}

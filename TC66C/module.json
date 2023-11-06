@@ -1,0 +1,16 @@
+{
+    "id": "{6CA4B9F5-3345-6069-9FA2-3D73AF85700B}",
+    "name": "TC66C",
+    "type": 3,
+    "vendor": "Ruideng Technology",
+    "aliases": [],
+    "parentRequirements": [
+        "{79827379-F36E-4ADA-8A95-5F8D1DC92FA9}"
+    ],
+    "childRequirements": [],
+    "implemented": [
+        "{018EF6B5-AB94-40C6-AA53-46943E824ACF}"
+    ],
+    "prefix": "TC66C",
+    "url": ""
+}

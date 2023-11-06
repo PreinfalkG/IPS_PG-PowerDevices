@@ -1,0 +1,14 @@
+{
+    "translations": {
+        "de": {
+            "form104": "Instanz inaktiv",
+            "form102": "Instanz ist aktiv",
+            "form201": "Serieller-Port nicht verbunden"
+        },
+        "en": {
+            "form102": "instance is active",
+            "form104": "instance is inactive",
+            "form201": "Serial port not connected"
+        }        
+    }
+}

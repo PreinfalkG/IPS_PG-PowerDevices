@@ -1,13 +1,12 @@
 {
 	"id": "{D2A0E780-BB66-F4EC-2A0F-41E8F0BC7460}",
-	"author": "Preinfalk Günter",
-	"name": "IP Symcon Power Devices (PowerSupply,Loader,Electronic Load,...)",
+	"name": "Power Devices",
+	"author": "PreinfalkG",	
 	"url": "",
-	"compatibility": {
-		"version": "5.0",
-		"date": 1491343200
-		},
-	"version": "0.9",
-	"build": 14,
-	"date": 0
+    "compatibility": {
+        "version": "6.4"
+    },
+	"version": "0.91",
+	"build": 20231106,
+	"date": 1699285053
 }

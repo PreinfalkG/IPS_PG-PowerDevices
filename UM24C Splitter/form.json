@@ -1,7 +1,7 @@
 {
 	"elements":
 	[
-		{ "name": "DebugLevel", "type": "Select", "caption": "Debug/Log Level",
+		{ "name": "LogLevel", "type": "Select", "caption": "Debug/Log Level",
             "options": [
                 { "label": "ALL", "value": 7 },
                 { "label": "TRACE", "value": 6 },

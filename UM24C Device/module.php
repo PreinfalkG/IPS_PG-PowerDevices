@@ -1,12 +1,15 @@
 <?
 
+require_once __DIR__ . '/../libs/COMMON_Fkt.php'; 
+
 class UM24C extends IPSModule
 {
-	private $debugLevel = 3;
-	private $enableIPSLogOutput = false;
+	private $logLevel = 3;
+	private $logCnt = 0;
+	private $enableIPSLogOutput = false;	
 	/*
 	7 = ALL 	: Alle Meldungen werden ungefiltert ausgegeben
-	6 = TRACE 	: ausführlicheres Debugging, Kommentare
+	6 = TRACE 	: ausfÃ¼hrlicheres Debugging, Kommentare
 	5 = DEBUG	: allgemeines Debugging (Auffinden von Fehlern)
 	4 = INFO	: allgemeine Informationen (Programm gestartet, Programm beendet, Verbindung zu Host Foo aufgebaut, Verarbeitung dauerte SoUndSoviel Sekunden .)
 	3 = WARN	: Auftreten einer unerwarteten Situation
@@ -17,32 +20,30 @@ class UM24C extends IPSModule
 	
 	public function __construct($InstanceID) {
 		
-		parent::__construct($InstanceID);		// Diese Zeile nicht löschen
+		parent::__construct($InstanceID);		// Diese Zeile nicht lÃ¶schen
 
-		$currentStatus = $this->GetStatus();
-		if($currentStatus == 102) {				//Instanz ist aktiv
-			$this->debugLevel = $this->ReadPropertyInteger("DebugLevel");
-			$this->enableIPSLogOutput = $this->ReadPropertyBoolean("EnableIPSLogOutput");	
-		} else {
-			if($this->debugLevel >= 4) { $this->AddDebugLogEntry(__FUNCTION__, sprintf("Current Status is '%s'", $currentStatus), 0); }	
-		}
-
-		if($this->debugLevel >= 6) { $this->AddDebugLogEntry(__FUNCTION__, "called ...", 0); }
-		if($this->debugLevel >= 6) { $this->AddDebugLogEntry(__FUNCTION__, sprintf("Debug Level is '%d'", $this->debugLevel), 0); }	
-		if($this->debugLevel >= 6) { $this->AddDebugLogEntry(__FUNCTION__, sprintf("EnableIPSLogOutput is '%d'", $this->enableIPSLogOutput), 0); }
+		$this->logLevel = @$this->ReadPropertyInteger("LogLevel"); 
+		$this->enableIPSLogOutput = @$this->ReadPropertyBoolean("EnableIPSLogOutput");	
+		if($this->logLevel >= LogLevel::TRACE) { $this->AddLog(__FUNCTION__, sprintf("Log-Level is %d", $this->logLevel)); }
 	}	
     
     public function Create() {
 		
-        parent::Create();	// Diese Zeile nicht löschen
-		
-		if($this->debugLevel >= 6) { $this->AddDebugLogEntry(__FUNCTION__, "called ...", 0); }
+		parent::Create();				//Never delete this line!
+
+		$logMsg = sprintf("Create Modul '%s [%s]'...", IPS_GetName($this->InstanceID), $this->InstanceID);
+		if($this->logLevel >= LogLevel::INFO) { $this->AddLog(__FUNCTION__, $logMsg); }
+		IPS_LogMessage(__CLASS__."_".__FUNCTION__, $logMsg);
+
+		$logMsg = sprintf("KernelRunlevel '%s'", IPS_GetKernelRunlevel());
+		if($this->logLevel >= LogLevel::DEBUG) { $this->AddLog(__FUNCTION__, $logMsg); }	
+
 		
 		$this->ConnectParent("{C89DF982-32A6-386E-3A86-5AD89741DB2C}"); // Splitter
 
 		$this->RegisterPropertyBoolean('AutoUpdate', false);
 		$this->RegisterPropertyInteger("TimerInterval", 5000);		
-		$this->RegisterPropertyInteger("DebugLevel", 3);
+		$this->RegisterPropertyInteger("LogLevel", 3);
 		$this->RegisterPropertyBoolean('EnableIPSLogOutput', false);		
 		
 		//Profiles and Vars
@@ -115,13 +116,17 @@ class UM24C extends IPSModule
 	}
 
 	public function Destroy() {
-		parent::Destroy();			//Never delete this line!
-		if($this->debugLevel >= 6) { $this->AddDebugLogEntry(__FUNCTION__, "called ...", 0); }
+		IPS_LogMessage(__CLASS__."_".__FUNCTION__, sprintf("Destroy Modul '%s' ...", $this->InstanceID));
+		parent::Destroy();						//Never delete this line!
 	}
 
 	public function ApplyChanges()	{
 
-		if($this->debugLevel >= 6) { $this->AddDebugLogEntry(__FUNCTION__, "called ...", 0); }
+		parent::ApplyChanges();					//Never delete this line!
+
+		$this->logLevel = $this->ReadPropertyInteger("LogLevel");
+		if($this->logLevel >= LogLevel::INFO) { $this->AddLog(__FUNCTION__, sprintf("Set Log-Level to %d", $this->logLevel)); }
+
 				
 		$this->RegisterMessage(0, IPS_KERNELSTARTED);		// wait until IPS is started, dataflow does not work until stated	
 		$this->RegisterMessage($this->InstanceID, FM_CONNECT);
@@ -129,16 +134,15 @@ class UM24C extends IPSModule
 		$this->RegisterMessage($this->InstanceID, IM_CONNECT);
         $this->RegisterMessage($this->InstanceID, IM_DISCONNECT);  
 		
-		parent::ApplyChanges();	// Diese Zeile nicht löschen
 		if (IPS_GetKernelRunlevel() <> KR_READY) {	// check kernel ready, if not wait
 			return;
 		}
 				
-		$this->debugLevel = $this->ReadPropertyInteger("DebugLevel");
-		$this->AddDebugLogEntry(__FUNCTION__, sprintf("INFO :: Set Debug Level  to %d", $this->debugLevel), 0);
+		$this->logLevel = $this->ReadPropertyInteger("LogLevel");
+		$this->AddLog(__FUNCTION__, sprintf("INFO :: Set Debug Level  to %d", $this->logLevel), 0);
 		
 		$this->enableIPSLogOutput = $this->ReadPropertyBoolean("EnableIPSLogOutput");	
-		$this->AddDebugLogEntry(__FUNCTION__, sprintf("INFO :: Set IPS-Log-Output  to %b", $this->enableIPSLogOutput), 0);
+		$this->AddLog(__FUNCTION__, sprintf("INFO :: Set IPS-Log-Output  to %b", $this->enableIPSLogOutput), 0);
 		
 		$autoUpdate = $this->ReadPropertyBoolean("AutoUpdate");		
 		if($autoUpdate) {
@@ -148,35 +152,34 @@ class UM24C extends IPSModule
 		}
 		$this->SetTimerInterval("Timer_AutoUpdate", $timerInterval);				
 
-		if($this->debugLevel >= 4) { $this->AddDebugLogEntry(__FUNCTION__, sprintf("Interval 'Timer_AutoUpdate' set to '%d' seconds", $timerInterval), 0); }
+		if($this->logLevel >= LogLevel::INFO) { $this->AddLog(__FUNCTION__, sprintf("Interval 'Timer_AutoUpdate' set to '%d' seconds", $timerInterval)); }
 	}
 	
 	public function Timer_AutoUpdate() {
-		if($this->debugLevel >= 6) { $this->AddDebugLogEntry(__FUNCTION__, "called ...", 0); }
+		if($this->logLevel >= LogLevel::TRACE) { $this->AddLog(__FUNCTION__, "called ..."); }
 		$this->RequestData();		
 	}
 	
 	public function RequestData() {
 		$data = "\xf0";
-		if($this->debugLevel >= 6) { $this->AddDebugLogEntry(__FUNCTION__, $data, 1); }
+		if($this->logLevel >= LogLevel::TRACE) { $this->AddLog(__FUNCTION__, $data, 1); }
 		$this->SendToSplitter(utf8_encode($data));
 	}
 	
 	protected function SendToSplitter(string $payload)
 	{						
-		if($this->debugLevel >= 5) { $this->AddDebugLogEntry(__FUNCTION__, $payload, 1); }
+		if($this->logLevel >= LogLevel::DEBUG) { $this->AddLog(__FUNCTION__, $payload, 1); }
 		$result = $this->SendDataToParent(json_encode(Array("DataID" => "{4C47F019-D24D-9A2E-A66F-3A7E14CB383E}", "Buffer" => $payload))); // Interface GUI
 		return $result;
 	}
 	
-	public function ReceiveData($JSONString)
-	{
+	public function ReceiveData($JSONString) {
 		$data = json_decode($JSONString);
 		$rawDataBuffer = $data->Buffer;
 		$rawDataBufferDecoded = utf8_decode($rawDataBuffer);
 		
-		if($this->debugLevel >= 5) { $this->AddDebugLogEntry(__FUNCTION__, $rawDataBuffer, 1); }
-		if($this->debugLevel >= 5) { $this->AddDebugLogEntry(__FUNCTION__ . " (UTF8 decoded)", $rawDataBufferDecoded, 1); }
+		if($this->logLevel >= LogLevel::DEBUG) { $this->AddLog(__FUNCTION__, $rawDataBuffer, 1); }
+		if($this->logLevel >= LogLevel::DEBUG) { $this->AddLog(__FUNCTION__ . " (UTF8 decoded)", $rawDataBufferDecoded, 1); }
 		
 		$rawDataLen = strlen($rawDataBufferDecoded);
 		
@@ -185,15 +188,15 @@ class UM24C extends IPSModule
 
 		$calcCRC = $this->CRC16_ModBus($rawData);
 
-		if($this->debugLevel >= 6) { $this->AddDebugLogEntry(__FUNCTION__ . " [.rawData.]", $rawData, 1); }
-		if($this->debugLevel >= 6) { $this->AddDebugLogEntry(__FUNCTION__ . " [.rawDataLen.]", $rawDataLen, 0); }
-		if($this->debugLevel >= 6) { $this->AddDebugLogEntry(__FUNCTION__ . " [.rawCRC.]", $rawCRC, 1); }
-		if($this->debugLevel >= 6) { $this->AddDebugLogEntry(__FUNCTION__ . " [.calcCRC.]", $calcCRC, 1); }
+		if($this->logLevel >= LogLevel::TRACE) { $this->AddLog(__FUNCTION__ . " [.rawData.]", $rawData, 1); }
+		if($this->logLevel >= LogLevel::TRACE) { $this->AddLog(__FUNCTION__ . " [.rawDataLen.]", $rawDataLen); }
+		if($this->logLevel >= LogLevel::TRACE) { $this->AddLog(__FUNCTION__ . " [.rawCRC.]", $rawCRC, 1); }
+		if($this->logLevel >= LogLevel::TRACE) { $this->AddLog(__FUNCTION__ . " [.calcCRC.]", $calcCRC, 1); }
 		
 		
 		//if($rawCRC != $calcCRC) {
 		if(1 != 1) {
-			if($this->debugLevel >= 3) { $this->AddDebugLogEntry(__FUNCTION__, "CRC ERROR [".$this->String2Hex($rawCRC) . " <> " . $this->String2Hex($calcCRC) ."]", 0); }
+			if($this->logLevel >= LogLevel::WARN) { $this->AddLog(__FUNCTION__, "CRC ERROR [".$this->String2Hex($rawCRC) . " <> " . $this->String2Hex($calcCRC) ."]"); }
 			$this->SetValue('CRCErrorCnt', $this->GetValue('CRCErrorCnt')+1);
 		} else {
 		
@@ -265,18 +268,6 @@ class UM24C extends IPSModule
 		}
 	}
 		
-	private function AddDebugLogEntry($name, $daten, $format) {
-		$this->SendDebug("[" . __CLASS__ . "] - " . $name, $daten, $format); 	
-
-		if($this->enableIPSLogOutput) {
-			if($format == 0) {
-				IPS_LogMessage("[" . __CLASS__ . "] - " . $name, $daten);	
-			} else {
-				IPS_LogMessage("[" . __CLASS__ . "] - " . $name, $this->String2Hex($daten));			
-			}
-		}
-	}
-	
 	private function String2Hex($string) {
 		$hex='';
 		for ($i=0; $i < strlen($string); $i++){
@@ -320,7 +311,7 @@ class UM24C extends IPSModule
 				break;
 				
 			case FM_CONNECT:	//DM_CONNECT
-				$this->AddDebugLogEntry(__FUNCTION__, "FM_CONNECT ...", 0);
+				$this->AddLog(__FUNCTION__, "FM_CONNECT ...", 0);
                 //$this->RegisterParent();
                 //if ($this->HasActiveParent())
                 //    $this->IOChangeState(IS_ACTIVE);
@@ -328,20 +319,20 @@ class UM24C extends IPSModule
                 //    $this->IOChangeState(IS_INACTIVE);
                 break;
             case FM_DISCONNECT:	//DM_DISCONNECT
-				$this->AddDebugLogEntry(__FUNCTION__, "FM_DISCONNECT ...", 0);
+				$this->AddLog(__FUNCTION__, "FM_DISCONNECT ...", 0);
                 //$this->RegisterParent();
                 //$this->IOChangeState(IS_INACTIVE);
                 break;
 			case IM_CONNECT:	//DM_CONNECT
-				$this->AddDebugLogEntry(__FUNCTION__, "IM_CONNECT ...", 0);
+				$this->AddLog(__FUNCTION__, "IM_CONNECT ...", 0);
 				//$this->RegisterParent();
                 break;
             case IM_DISCONNECT:	//DM_DISCONNECT
-				$this->AddDebugLogEntry(__FUNCTION__, "IM_DISCONNECT ...", 0);
+				$this->AddLog(__FUNCTION__, "IM_DISCONNECT ...", 0);
 				//$this->RegisterParent();
                 break;				
             case IM_CHANGESTATUS:
-				$this->AddDebugLogEntry(__FUNCTION__, "IM_CHANGESTATUS ...", 0);
+				$this->AddLog(__FUNCTION__, "IM_CHANGESTATUS ...", 0);
                 //if ($SenderID == $this->ParentID)
                 //    $this->IOChangeState($Data[0]);
                 break;				
@@ -355,11 +346,11 @@ class UM24C extends IPSModule
         $ParentId = @IPS_GetInstance($this->InstanceID)['ConnectionID'];
         if ($ParentId <> $OldParentId) {
             if ($OldParentId > 0) {
-				if($this->debugLevel >= 4) { $this->AddDebugLogEntry(__FUNCTION__, sprintf("UnregisterMessage 'IM_CHANGESTATUS' for %d", $OldParentId), 0); }	
+				if($this->logLevel >= LogLevel::INFO) { $this->AddLog(__FUNCTION__, sprintf("UnregisterMessage 'IM_CHANGESTATUS' for %d", $OldParentId)); }	
                 $this->UnregisterMessage($OldParentId, IM_CHANGESTATUS);
 			}
             if ($ParentId > 0) {
-				if($this->debugLevel >= 4) { $this->AddDebugLogEntry(__FUNCTION__, sprintf("RegisterMessage 'IM_CHANGESTATUS' for %d", $ParentId), 0); }
+				if($this->logLevel >= LogLevel::INFO) { $this->AddLog(__FUNCTION__, sprintf("RegisterMessage 'IM_CHANGESTATUS' for %d", $ParentId)); }
                 $this->RegisterMessage($ParentId, IM_CHANGESTATUS);
 			}  else {
                 $ParentId = 0;
@@ -413,7 +404,7 @@ class UM24C extends IPSModule
 		} else {
 			$profile = IPS_GetVariableProfile($Name);
 			if ($profile['ProfileType'] != $Vartype)
-				$this->AddDebugLogEntry(__FUNCTION__ , "Variable profile type does not match for profile " . $Name, 0);
+				$this->AddLog(__FUNCTION__ , "Variable profile type does not match for profile " . $Name, 0);
 		}
 
 		IPS_SetVariableProfileIcon($Name, $Icon);
@@ -458,4 +449,22 @@ class UM24C extends IPSModule
 			SetValue($this->GetIDForIdent($Ident), $Value);
 		}
 	}	
+
+	protected function AddLog($name, $daten, $format=0, $ipsLogOutput=false) {
+		$this->logCnt++;
+		$logSender = "[".__CLASS__."] - " . $name;
+		if($this->logLevel >= LogLevel::DEBUG) {
+			$logSender = sprintf("%02d-T%2d [%s] - %s", $this->logCnt, $_IPS['THREAD'], __CLASS__, $name);
+		} 
+		$this->SendDebug($logSender, $daten, $format); 	
+	
+		if($ipsLogOutput or $this->enableIPSLogOutput) {
+			if($format == 0) {
+				IPS_LogMessage($logSender, $daten);	
+			} else {
+				IPS_LogMessage($logSender, $this->String2Hex($daten));			
+			}
+		}
+	}
+
 }
